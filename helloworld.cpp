@@ -1,101 +1,71 @@
-#include <iostream>
-#include <vector>
-#include <cstring>
-// #include <algorithm>
+#include <bits/stdc++.h>
+using namespace std;
 
-using std::cin;
-using std::cout;
-using std::endl;
-using std::vector;
-using std::pair;
-using std::greater;
-using std::make_pair;
-
-#define MAXEDGE 500000
-#define MAXNODE 10000
-
-vector< pair<int,int> > edge[MAXEDGE + 10];
-
-int ifInStack[MAXNODE + 10];
-int dis[MAXNODE + 10];
-
-class stack 
-{
+class Solution {
 public:
-    int data[MAXNODE + 10];
-    int ptr;
-    int ptrH;
-    stack()
+    typedef vector< vector<int> > matmul;
+    matmul ope(matmul f1,matmul f2)
     {
-        ptrH=0;
-        ptr = 0;
-    }
-    void push_back(int x)
-    {
-        data[ptr] = x;
-        ptr++;
-        ptr%=MAXNODE;
-    }
-    int size()
-    {
-        return (ptr-ptrH+MAXNODE)%MAXNODE;
-    }
-    int end()
-    {
-        return data[ptrH];
-    }
-    void pop_back()
-    {
-        ptrH++;
-        ptrH%=MAXNODE;
-    }
-    bool empty()
-    {
-        return ptrH==ptr;
-    }
-};
-
-stack nodeStack;
-
-
-int main()
-{
-    int n,m,s;
-    cin >> n >> m >> s;
-    for(int i=0;i<=n;i++)
-        dis[i] = (1 << 31) -1;
-
-    for(int i=0; i<m; i++)
-    {
-        int midU,midV,midVal;
-        cin >> midU >> midV >> midVal;
-        edge[midU].push_back( make_pair( midV, midVal ) );
-    }
-    dis[s] = 0;
-    nodeStack.push_back(s);
-    ifInStack[s]=1;
-
-    while(!nodeStack.empty())
-    {
-        int node = nodeStack.end();
-        nodeStack.pop_back();
-        ifInStack[node] = 0;
-        for(auto i : edge[node])
+        matmul mid(f1);
+        for(int i = 0; i < f1.size() ; i++)
         {
-            if(dis[node] + i.second < dis[i.first] )
+            for(int j = 0; j < f1[0].size() ; j++)
             {
-                dis[i.first] = dis[node] + i.second;
-                if(!ifInStack[i.first])
+                mid[i][j] = 0;
+                for(int k = 0; k < f1.size() ; k++)
                 {
-                    nodeStack.push_back(i.first);
-                    ifInStack[i.first] = 1;
+                    mid[i][j] += f1[i][k] * f2[k][j] ;
                 }
             }
         }
+        // cout<<"=============\n";
+        // print(f1);
+        // print(f2);
+        // print(mid);
+        return mid;
+    }
+    matmul qp(matmul f, int x)
+    {
+        matmul ans = f;
+        for(int i = 0 ; i < f.size() ; i++)
+        for(int j = 0 ; j < f.size() ; j++)
+            if(i == j)
+                ans[i][j] = 1;
+            else
+                ans[i][j] = 0;
+        
+        while(x)
+        {
+            if(x&1)
+            {
+                ans = ope(ans , f);
+            }
+            f = ope(f,f);
+            x >>= 1;
+        }
+
+        return ans;
+    }
+    int fib(int n) {
+        if(n == 0)
+            return 0;
+        if(n == 1)
+            return 1;
+        matmul factor = {{1,1} , {1,0}};
+        factor = qp(factor, n - 1);
+        return factor[0][0];
     }
 
-    for(int i=1;i<=n;i++)
-        cout<<dis[i]<<" ";
-    puts("");
-    return 0;
+    void print(matmul f)
+    {
+        cout<<endl;
+        cout<<f[0][0]<<"\t"<<f[0][1]<<"\n"<<f[1][0]<<"\t"<<f[1][1]<<"\n";
+        cout<<endl;
+    }
+};
+
+int main()
+{
+    Solution solution;
+    cout<<solution.fib(5)<<endl;
 }
